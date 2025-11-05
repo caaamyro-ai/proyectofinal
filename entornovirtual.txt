@@ -1,0 +1,19 @@
+#crear un venv dentro de tu proeycto 
+python -m venv venv
+
+#activas el venv
+venv\Scripts\activate
+
+#ahora cualquier libreria se instala dentro del venv
+
+#salir del venv
+deactivate
+
+#instalar librerias
+pip install flask
+
+#crear archivo requirements (ya lo tienen asi que no es necesario)
+#pip freeze > requirements.txt
+
+#instalar
+pip install -r requirements.txt
