@@ -6,8 +6,8 @@ venv\Scripts\activate
 
 #ahora cualquier libreria se instala dentro del venv
 
-#salir del venv
-deactivate
+#salir del venv, en este caso no es necesario
+#deactivate
 
 #instalar librerias
 pip install flask
