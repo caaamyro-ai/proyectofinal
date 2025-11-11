@@ -1,0 +1,28 @@
+<!-- Estructura básica para frontend html, hay que modificarla a nuestro gusto -->
+<!DOCTYPE html> <!--Indica al navegador que el documento es HTML5. Es la declaración estándar que permite al navegador renderizar la página correctamente-->
+<html lang="es"> <!-- Indica que el contenido está en español -->
+<head>
+    <meta charset="UTF-8"> <!--Define la codificación de caracteres (UTF-8), necesaria para mostrar correctamente acentos y caracteres especiales-->
+    <title>Proyecto Latinas in Cloud Tracker de Hábitos</title> <!-- este título no es visible en la página en sí-->
+</head>
+<body>
+    <h1>Mis Hábitos</h1>
+
+    {% if habits %} <!-- Inicio de una estructura condicional de Jinja2. Comprueba si la variable habits existe y no está vacía-->
+        <ul> <!-- lista no ordenada-->
+            {% for habit in habits %} <!-- inicio bucle jinja2, itera sobre habits-->
+                <li> <!-- Elemento de la lista: aquí ponemos la representación visible de cada hábito-->
+                    {{ habit.name }} - <!-- inserta la propiedad name del objeto habit en la plantilla, las dobles llaves imprimem en jinja2-->
+                    {% if habit.completed %} <!-- aquí comprobamos si los booleanos son true or false-->
+                        ✅ Completado
+                    {% else %}
+                        ❌ Pendiente
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %} <!-- Parte del if principal, se ejecuta cuando habits está vacío o es None-->
+        <p>No tienes hábitos registrados aún.</p>
+    {% endif %}
+</body>
+</html>
