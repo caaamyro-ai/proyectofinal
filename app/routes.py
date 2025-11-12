@@ -9,14 +9,23 @@ main = Blueprint('main', __name__)
 def index():
     # Obtiene todos los hábitos de la base de datos tabla habit
     habits = Habit.query.all()
-    return render_template('index.html', habits=habits) # envía los datos a la plantilla index
+    return render_template('index.html', habits=habits)  # envía los datos a la plantilla index
 
 # agrega una ruta para agregar hábitos
 @main.route('/add', methods=['POST']) # ruta para enviar los datos tipo POST (envía datos desde el servidor)
 def add_habit():
-    habit_name = request.form.get('name')  # toma el dato del formulario HTML
-    if habit_name:  # si el usuario escribió algo
-        new_habit = Habit(name=habit_name)
-        db.session.add(new_habit)
-        db.session.commit()
-    return redirect(url_for('main.index'))  # redirige a la página principal
+    name = request.form.get('name')  #Aquí Flask recoge los datos del formulario HTML, el form debe tener una entrada name
+    if name:  # Verifica que el campo no esté vacío
+        new_habit = Habit(name=name) # Crea un nuevo objeto Habit
+        db.session.add(new_habit) # Agrega el nuevo hábito a la sesión de SQLAlchemy (como un "borrador")
+        db.session.commit()  # guarda los datos en la base 
+    return redirect(url_for('main.index')) # redirije a la página principal
+
+# Para marcar hábitos como completados 
+@main.route('/complete/<int:habit_id>', methods=['POST'])  # c/hábito tiene su propio id, y <int:habit_id> permite capturar ese n° desde la url 
+def complete_habit(habit_id):
+    habit = Habit.query.get(habit_id)   # Busca el hábito en la base de datos según su ID
+    if habit:
+        habit.completed = True  # Cambia el valor de completed a True
+        db.session.commit()  # Guarda los cambios en la base de datos
+    return redirect(url_for('main.index'))  # Redirige al usuario de nuevo a la página principal
