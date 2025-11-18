@@ -2,10 +2,12 @@
 <html lang="es"> <!-- Indica que el contenido está en español -->
 <head>
     <meta charset="UTF-8"> <!--Define la codificación de caracteres (UTF-8), necesaria para mostrar correctamente acentos y caracteres especiales-->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!--viewport sirve para quepueda verse en el celu-->  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!--viewport sirve para que pueda verse en el celu-->  
     <title>Proyecto Latinas in Cloud Tracker de Hábitos</title> <!-- este título no es visible en la página en sí-->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"> <!-- para que los botones sean íconos-->
-    <!-- Estilos  embebidos de CSS-->
+
+    <!-- Link a Font Awesome para usar íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
      <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,26 +15,23 @@
             margin: 0;
             padding: 20px;
         }
-        
         h1 {
             text-align: center;
             color: #333;
         }
 
         /* Formulario */
-        .add-form {  /* centra y da estilo al formulario de agregar*/ 
+        .add-form {
             display: flex;
             justify-content: center;
             margin-bottom: 20px;
         }
-
         .add-form input {
             padding: 10px;
             width: 260px;
             border: 1px solid #ccc;
             border-radius: 6px;
         }
-
         .add-form button {
             padding: 10px 15px;
             margin-left: 10px;
@@ -42,17 +41,15 @@
             border-radius: 6px;
             cursor: pointer;
         }
-
         .add-form button:hover {
             background: #0056b3;
         }
 
-        /* cración de listas de hábitos centradas */
+        /* Lista de hábitos */
         .habit-list {
             max-width: 500px;
             margin: auto;
         }
-
         .habit-item {
             background: white;
             padding: 12px 15px;
@@ -63,74 +60,94 @@
             align-items: center;
             border-left: 6px solid transparent;
         }
-
         .completed {
             border-left-color: #28a745;
             opacity: 0.7;
             text-decoration: line-through;
         }
 
-        .buttons form {
-            display: inline;
-        }
-
-        .btn { /*agrupa estilos para botones*/ 
+        /* Botones */
+        .buttons form { display: inline; }
+        .btn {
             padding: 6px 8px;
-            font-size: 14px;
+            font-size: 16px;
             border: none;
             cursor: pointer;
             border-radius: 6px;
             margin-left: 5px;
         }
-
         .btn-complete { background: #28a745; color: white; }
         .btn-edit { background: #ffc107; }
         .btn-delete { background: #dc3545; color: white; }
-
         .btn-complete:hover { background: #1e7e34; }
         .btn-delete:hover { background: #b52a37; }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 120px;
+            background-color: black;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
      </style>
 </head>
 
 <body>
     <h1>Mis Hábitos</h1>
 
-        <!-- Formulario para agregar hábito -->
+    <!-- Formulario para agregar hábito -->
     <form class="add-form" action="{{ url_for('main.add_habit') }}" method="POST">
-        <input type="text" name="name" placeholder="Nuevo hábito..." required> <!-- required evita que el navegador envíe el formulario vacío (validación mínima cliente)-->
+        <input type="text" name="name" placeholder="Nuevo hábito..." required> <!-- required evita enviar vacío -->
         <button type="submit">Agregar</button>
     </form>
 
-        <div class="habit-list"> <!-- contiene todas las tarjetas-->
-           {% for habit in habits %} <!-- bucle Jinja2 que itera la lista habits pasada desde Flask (index())-->
-             <div class="habit-item {% if habit.completed %}completed{% endif %}"> <!-- se añade la clase completed solo si habit.completed es verdadero (Jinja {% if %}), cambiando su apariencia-->
-              <span>{{ habit.name }}</span>
+    <div class="habit-list">
+        {% for habit in habits %}
+        <div class="habit-item {% if habit.completed %}completed{% endif %}">
+            <span>{{ habit.name }}</span>
 
             <div class="buttons">
-                <!-- Botón completar -->
-                <form action="{{ url_for('main.complete_habit', habit_id=habit.id) }}" method="POST">
-                    <button class="btn btn-complete" type="submit">
-                       {% if habit.completed %}
-                         <i class="fa-solid fa-xmark"></i> 
-                       {% else %}
-                          <i class="fa-solid fa-check"></i>
-                       {% endif %}
-                    </button>
 
+                <!-- Botón completar -->
+                <form action="{{ url_for('main.complete_habit', habit_id=habit.id) }}" method="POST" class="tooltip">
+                    <button class="btn btn-complete" type="submit">
+                        <i class="fa-solid fa-check"></i>
+                    </button>
+                    <span class="tooltiptext">Marcar/Desmarcar</span>
                 </form>
 
                 <!-- Botón editar -->
-                <a href="{{ url_for('main.edit_habit', habit_id=habit.id) }}">
-                  <button class="btn btn-edit" type="button">
-                       <i class="fa-solid fa-pen"></i>
-                  </button>
+                <a href="{{ url_for('main.edit_habit', habit_id=habit.id) }}" class="tooltip">
+                    <button class="btn btn-edit" type="button">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <span class="tooltiptext">Editar</span>
                 </a>
 
                 <!-- Botón eliminar -->
-                <form action="{{ url_for('main.delete_habit', habit_id=habit.id) }}" method="POST">
+                <form action="{{ url_for('main.delete_habit', habit_id=habit.id) }}" method="POST" class="tooltip">
                     <button class="btn btn-delete" type="submit">
-                         <i class="fa-solid fa-trash"></i>
+                        <i class="fa-solid fa-trash"></i>
                     </button>
+                    <span class="tooltiptext">Eliminar</span>
                 </form>
 
             </div>
@@ -140,3 +157,4 @@
 
 </body>
 </html>
+
