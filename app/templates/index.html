@@ -1,26 +1,29 @@
-<!DOCTYPE html> <!--Indica al navegador que el documento es HTML5. Es la declaración estándar que permite al navegador renderizar la página correctamente-->
+<!--AQUÍ EDITEN LO QUE QUIERAN, ESTO ES SÓLO UN FORMATO PARA QUE NO SE CAIGA LA APP-->
+<!DOCTYPE html> <!-- Indica al navegador que el documento es HTML5 -->
 <html lang="es"> <!-- Indica que el contenido está en español -->
 <head>
-    <meta charset="UTF-8"> <!--Define la codificación de caracteres (UTF-8), necesaria para mostrar correctamente acentos y caracteres especiales-->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!--viewport sirve para que pueda verse en el celu-->  
-    <title>Proyecto Latinas in Cloud Tracker de Hábitos</title> <!-- este título no es visible en la página en sí-->
+    <meta charset="UTF-8"> <!-- Permite tildes y caracteres especiales -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Adaptación para móviles -->
+    <title>Proyecto Latinas in Cloud - Tracker de Hábitos</title>
 
-    <!-- Link a Font Awesome para usar íconos -->
+    <!-- Íconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-     <style>
+    <style>
+        /* --- ESTILOS GENERALES --- */
         body {
             font-family: Arial, sans-serif;
             background: #f4f6f9;
             margin: 0;
             padding: 20px;
         }
-        h1 {
+
+        h1, h2 {
             text-align: center;
             color: #333;
         }
 
-        /* Formulario */
+        /* --- FORMULARIOS --- */
         .add-form {
             display: flex;
             justify-content: center;
@@ -45,10 +48,11 @@
             background: #0056b3;
         }
 
-        /* Lista de hábitos */
+        /* --- LISTA DE HÁBITOS --- */
         .habit-list {
-            max-width: 500px;
+            max-width: 600px;
             margin: auto;
+            margin-top: 30px;
         }
         .habit-item {
             background: white;
@@ -66,7 +70,7 @@
             text-decoration: line-through;
         }
 
-        /* Botones */
+        /* --- BOTONES --- */
         .buttons form { display: inline; }
         .btn {
             padding: 6px 8px;
@@ -77,12 +81,12 @@
             margin-left: 5px;
         }
         .btn-complete { background: #28a745; color: white; }
-        .btn-edit { background: #ffc107; }
-        .btn-delete { background: #dc3545; color: white; }
+        .btn-edit    { background: #ffc107; }
+        .btn-delete  { background: #dc3545; color: white; }
         .btn-complete:hover { background: #1e7e34; }
-        .btn-delete:hover { background: #b52a37; }
+        .btn-delete:hover   { background: #b52a37; }
 
-        /* Tooltip */
+        /* --- TOOLTIP --- */
         .tooltip {
             position: relative;
             display: inline-block;
@@ -107,27 +111,43 @@
             visibility: visible;
             opacity: 1;
         }
-     </style>
+
+        /* --- CHECKBOXES DÍAS SEMANALES --- */
+        .days-box {
+            margin-top: 10px;
+        }
+        .day-label {
+            margin-right: 8px;
+        }
+    </style>
 </head>
 
 <body>
+
     <h1>Mis Hábitos</h1>
 
-    <!-- Formulario para agregar hábito -->
-    <form class="add-form" action="{{ url_for('main.add_habit') }}" method="POST">
-        <input type="text" name="name" placeholder="Nuevo hábito..." required> <!-- required evita enviar vacío -->
+  
+    <!--                 SECCIÓN: HÁBITOS DIARIOS                       -->
+    <h2>Hábitos Diarios</h2>
+
+    <!-- Formulario para agregar un hábito diario -->
+    <!-- AHORA apunta a la ruta del nuevo blueprint main -->
+    <form class="add-form" action="{{ url_for('main.add_daily_habit') }}" method="POST">
+        <input type="text" name="name" placeholder="Nuevo hábito diario..." required>
         <button type="submit">Agregar</button>
     </form>
 
+    <!-- LISTA DE HÁBITOS DIARIOS -->
+    <!-- 'daily' viene del controlador main.index -->
     <div class="habit-list">
-        {% for habit in habits %}
+        {% for habit in daily %}
         <div class="habit-item {% if habit.completed %}completed{% endif %}">
             <span>{{ habit.name }}</span>
 
             <div class="buttons">
 
-                <!-- Botón completar -->
-                <form action="{{ url_for('main.complete_habit', habit_id=habit.id) }}" method="POST" class="tooltip">
+                <!-- Botón marcar/desmarcar -->
+                <form action="{{ url_for('main.toggle_daily', habit_id=habit.id) }}" method="POST" class="tooltip">
                     <button class="btn btn-complete" type="submit">
                         <i class="fa-solid fa-check"></i>
                     </button>
@@ -135,7 +155,7 @@
                 </form>
 
                 <!-- Botón editar -->
-                <a href="{{ url_for('main.edit_habit', habit_id=habit.id) }}" class="tooltip">
+                <a href="{{ url_for('main.edit_daily', habit_id=habit.id) }}" class="tooltip">
                     <button class="btn btn-edit" type="button">
                         <i class="fa-solid fa-pen"></i>
                     </button>
@@ -143,7 +163,76 @@
                 </a>
 
                 <!-- Botón eliminar -->
-                <form action="{{ url_for('main.delete_habit', habit_id=habit.id) }}" method="POST" class="tooltip">
+                <form action="{{ url_for('main.delete_daily', habit_id=habit.id) }}" method="POST" class="tooltip">
+                    <button class="btn btn-delete" type="submit">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                    <span class="tooltiptext">Eliminar</span>
+                </form>
+
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!--                 SECCIÓN: HÁBITOS SEMANALES                     -->
+
+    <h2>Hábitos Semanales</h2>
+
+    <!-- Formulario para agregar hábito semanal -->
+    <!-- Aquí se ocupan checkboxes para selección de días -->
+    <form class="add-form" action="{{ url_for('main.add_weekly_habit') }}" method="POST"
+          style="flex-direction: column; align-items:center;">
+
+        <input type="text" name="name" placeholder="Nuevo hábito semanal..." required>
+
+        <div class="days-box">
+            <!-- Los values deben coincidir EXACTAMENTE con los que se guardan en DB -->
+            <label class="day-label"><input type="checkbox" name="days" value="mon"> Lun</label>
+            <label class="day-label"><input type="checkbox" name="days" value="tue"> Mar</label>
+            <label class="day-label"><input type="checkbox" name="days" value="wed"> Mié</label>
+            <label class="day-label"><input type="checkbox" name="days" value="thu"> Jue</label>
+            <label class="day-label"><input type="checkbox" name="days" value="fri"> Vie</label>
+            <label class="day-label"><input type="checkbox" name="days" value="sat"> Sáb</label>
+            <label class="day-label"><input type="checkbox" name="days" value="sun"> Dom</label>
+        </div>
+
+        <button type="submit" style="margin-top:10px;">Agregar</button>
+    </form>
+
+    <!-- LISTA DE HÁBITOS SEMANALES -->
+    <!-- 'weekly' viene del controlador main.index -->
+    <div class="habit-list">
+        {% for habit in weekly %}
+        <div class="habit-item">
+            <span>{{ habit.name }}</span>
+
+            <div>
+                <!-- Muestra los días seleccionados -->
+                <small>Días: {{ habit.days }}</small>
+            </div>
+
+            <div class="buttons">
+
+                <!-- Ver/registrar días completados -->
+                <!-- OJO: Esta ruta ahora apunta al blueprint logs -->
+                <a href="{{ url_for('logs.view_weekly_log', habit_id=habit.id) }}" class="tooltip">
+                    <button class="btn btn-complete" type="button">
+                        <i class="fa-solid fa-calendar-check"></i>
+                    </button>
+                    <span class="tooltiptext">Registrar día</span>
+                </a>
+
+                <!-- Botón editar -->
+                <a href="{{ url_for('main.edit_weekly', habit_id=habit.id) }}" class="tooltip">
+                    <button class="btn btn-edit" type="button">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <span class="tooltiptext">Editar</span>
+                </a>
+
+                <!-- Botón eliminar -->
+                <form action="{{ url_for('main.delete_weekly', habit_id=habit.id) }}" method="POST" class="tooltip">
                     <button class="btn btn-delete" type="submit">
                         <i class="fa-solid fa-trash"></i>
                     </button>
@@ -157,4 +246,5 @@
 
 </body>
 </html>
+
 
