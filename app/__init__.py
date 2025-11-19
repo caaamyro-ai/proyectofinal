@@ -14,28 +14,21 @@ def create_app():
     # Vincular la base de datos a la aplicación
     db.init_app(app)
 
-    # IMPORTANTE:
-    # Se importan los modelos aquí para evitar errores de referencia circular.
-    # Ahora importamos DailyHabit, WeeklyHabit y WeeklyLog.
-    from .models import DailyHabit, WeeklyHabit, WeeklyLog
+    # Importar modelos (IMPORTANTÍSIMO: hacer esto después de crear db)
+    from .models import DailyHabit, WeeklyHabit, WeeklyHabitCompletion
 
+    # Importar rutas
+    from .routes.main import main
+    from .routes.logs import logs
+    from .routes.stats import stats
 
-    # Rutas principales: agregar, editar, borrar, listar hábitos
-    from .routes_main import main
-
-    # Rutas para registrar los días completados del hábito semanal
-    from .routes_logs import logs
-
-    # Rutas para estadísticas (semanales, mensuales, anuales)
-    from .routes_stats import stats
-
-    # Registrar todos los blueprints en la aplicación
+    # Registrar blueprints
     app.register_blueprint(main)
     app.register_blueprint(logs)
     app.register_blueprint(stats)
 
     # Crear tablas dentro del contexto de la aplicación
     with app.app_context():
-        db.create_all()  # crea todas las tablas si no existen (daily, weekly, weekly_logs)
+        db.create_all()
 
     return app
