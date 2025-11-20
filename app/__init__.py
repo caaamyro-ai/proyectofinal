@@ -1,25 +1,33 @@
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy # importa la extensión SQLAlchemy de Flask (conecta la app con una base de datos)
+from flask_sqlalchemy import SQLAlchemy  # Extensión que conecta Flask con la base de datos
 
-# Crear la instancia de la base de datos primero
+# Crear primero la instancia global de la base de datos
 db = SQLAlchemy()
 
 def create_app():
     app = Flask(__name__)
 
-    # Configuración de la base de datos
+    # Configuración de la base de datos: usa SQLite y crea habits.db en la carpeta del proyecto
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///habits.db'
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # evita advertencias innecesarias
 
-    # Inicializar la base de datos con la app
+    # Vincular la base de datos a la aplicación
     db.init_app(app)
 
-    # Importar aquí para evitar errores de referencia circular
-    from .models import Habit
-    from .routes import main
-    app.register_blueprint(main)
+    # Importar modelos (IMPORTANTÍSIMO: hacer esto después de crear db)
+    from .models import DailyHabit, WeeklyHabit, WeeklyHabitCompletion
 
-    # Crear las tablas
+    # Importar rutas
+    from .routes.main import main
+    from .routes.logs import logs
+    from .routes.stats import stats
+
+    # Registrar blueprints
+    app.register_blueprint(main)
+    app.register_blueprint(logs)
+    app.register_blueprint(stats)
+
+    # Crear tablas dentro del contexto de la aplicación
     with app.app_context():
         db.create_all()
 
