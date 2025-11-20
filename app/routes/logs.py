@@ -1,10 +1,10 @@
-# estas rutas escriben en HabitLog para tener estadísticas reales.
+# estas rutas escriben en WeeklyHabitCompletion para tener estadísticas reales.
 # este archivo se encarga SOLO del registro histórico, para mantener orden.
 
 from flask import Blueprint, redirect, url_for
-from . import db
-from .models import DailyHabit, WeeklyHabit, HabitLog
-from datetime import datetime
+from app import db
+from ..models import DailyHabit, WeeklyHabit, WeeklyHabitCompletion
+from datetime import datetime, timezone # Aconsejable para que tome la zona horaria
 
 logs = Blueprint("logs", __name__)
 
@@ -14,14 +14,14 @@ def log_daily(habit_id):
 
     habit = DailyHabit.query.get(habit_id)
     habit.completed = not habit.completed
-    habit.completed_at = datetime.utcnow() if habit.completed else None
+    habit.completed_at = datetime.now(timezone.utc) if habit.completed else None
 
-    # Registrar en HabitLog si se completa
+    # Registrar en WeeklyHabitCompletion si se completa
     if habit.completed:
-        entry = HabitLog(
+        entry = WeeklyHabitCompletion(
             habit_id=habit.id,
             habit_type="daily",
-            date=datetime.utcnow().date()
+            date=datetime.now(timezone.utc).date()
         )
         db.session.add(entry)
 
@@ -35,12 +35,12 @@ def log_weekly(habit_id):
     habit = WeeklyHabit.query.get(habit_id)
 
     # Registrar día actual
-    habit.completed_at = datetime.utcnow()
+    habit.completed_at = datetime.now(timezone.utc)
 
-    entry = HabitLog(
+    entry = WeeklyHabitCompletion(
         habit_id=habit.id,
         habit_type="weekly",
-        date=datetime.utcnow().date()
+        date=datetime.now(timezone.utc).date()
     )
     db.session.add(entry)
 

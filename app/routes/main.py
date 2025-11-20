@@ -3,8 +3,8 @@
 # las rutas de estadísticas están separadas para mantener el proyecto limpio.
 
 from flask import Blueprint, render_template, request, redirect, url_for
-from . import db
-from .models import DailyHabit, WeeklyHabit
+from app import db
+from ..models import DailyHabit, WeeklyHabit
 
 main = Blueprint("main", __name__)
 
