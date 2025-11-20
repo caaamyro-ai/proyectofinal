@@ -174,60 +174,72 @@
         {% endfor %}
     </div>
 
-    <!-- SECCIÓN: HÁBITOS SEMANALES-->
+   <!-- SECCIÓN: HÁBITOS SEMANALES -->
+<h2> Semanales</h2>
 
-    <h2> Semanales</h2>
+<form class="add-form" action="{{ url_for('main.add_weekly_habit') }}" method="POST"
+      style="flex-direction: column; align-items:center;">
 
-    <form class="add-form" action="{{ url_for('main.add_weekly_habit') }}" method="POST"
-          style="flex-direction: column; align-items:center;">
+    <input type="text" name="name" placeholder="Nuevo hábito semanal..." required>
 
-        <input type="text" name="name" placeholder="Nuevo hábito semanal..." required>
+    <!-- Ya NO hay checkboxes aquí porque sólo deben verse al editar -->
+    <button type="submit" style="margin-top:10px;">Agregar</button>
+</form>
 
-        <button type="submit" style="margin-top:10px;">Agregar</button>
-    </form>
+<div class="habit-list">
+    {% for habit in weekly %}
+    <div class="habit-item">
 
-    <!-- LISTA DE HÁBITOS SEMANALES -->
-    <div class="habit-list">
-        {% for habit in weekly %}
-        <div class="habit-item">
-            <span>{{ habit.name }}</span>
+        <span>{{ habit.name }}</span>
 
-            <div>
-                <!-- Muestra los días seleccionados -->
-                <small>Días: {{ habit.days }}</small>
-            </div>
+        <!-- CHECKBOXES SOLO DE LOS DÍAS CONFIGURADOS -->
+        <div class="days-box">
 
-            <div class="buttons">
+            {% set day_names = {
+                'mon': 'Lun', 'tue': 'Mar', 'wed': 'Mié',
+                'thu': 'Jue', 'fri': 'Vie', 'sat': 'Sáb', 'sun': 'Dom'
+            } %}
 
-                <!-- BOTÓN registrar día semanal -->
-                <!-- CAMBIO IMPORTANTE: esta ruta es POST, por eso debe ir en form -->
-                <form action="{{ url_for('logs.log_weekly', habit_id=habit.id) }}" method="POST" class="tooltip">
-                    <button class="btn btn-complete" type="submit">
-                        <i class="fa-solid fa-calendar-check"></i>
-                    </button>
-                    <span class="tooltiptext">Registrar día</span>
-                </form>
+            {% set days_list = habit.days.split(',') %}
 
-                <!-- Botón editar -->
-                <a href="{{ url_for('main.edit_weekly', habit_id=habit.id) }}" class="tooltip">
-                    <button class="btn btn-edit" type="button">
-                        <i class="fa-solid fa-pen"></i>
-                    </button>
-                    <span class="tooltiptext">Editar</span>
-                </a>
-
-                <!-- Botón eliminar -->
-                <form action="{{ url_for('main.delete_weekly', habit_id=habit.id) }}" method="POST" class="tooltip">
-                    <button class="btn btn-delete" type="submit">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                    <span class="tooltiptext">Eliminar</span>
-                </form>
-
-            </div>
+            {% for d in days_list %}
+            <form action="{{ url_for('logs.log_weekly', habit_id=habit.id) }}" 
+                  method="POST"
+                  style="display:inline; margin-right:10px;">
+                
+                <input type="hidden" name="day" value="{{ d }}">
+                
+                <label>
+                    <input type="checkbox" onchange="this.form.submit()">
+                    {{ day_names[d] }}
+                </label>
+            </form>
+            {% endfor %}
         </div>
-        {% endfor %}
+
+        <!-- BOTONES EDITAR/ELIMINAR -->
+        <div class="buttons">
+
+            <a href="{{ url_for('main.edit_weekly', habit_id=habit.id) }}" class="tooltip">
+                <button class="btn btn-edit" type="button">
+                    <i class="fa-solid fa-pen"></i>
+                </button>
+                <span class="tooltiptext">Editar</span>
+            </a>
+
+            <form action="{{ url_for('main.delete_weekly', habit_id=habit.id) }}" 
+                  method="POST" class="tooltip">
+                <button class="btn btn-delete" type="submit">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+                <span class="tooltiptext">Eliminar</span>
+            </form>
+
+        </div>
+
     </div>
+    {% endfor %}
+</div>
 
 </body>
 </html>
