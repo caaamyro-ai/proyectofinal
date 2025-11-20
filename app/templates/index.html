@@ -127,8 +127,8 @@
     <h1>Mis Hábitos</h1>
 
   
-    <!--                 SECCIÓN: HÁBITOS DIARIOS                       -->
-    <h2>Hábitos Diarios</h2>
+    <!-- SECCIÓN: HÁBITOS DIARIOS-->
+    <h2> Diarios</h2>
 
     <!-- Formulario para agregar un hábito diario -->
     <!-- AHORA apunta a la ruta del nuevo blueprint main -->
@@ -138,7 +138,6 @@
     </form>
 
     <!-- LISTA DE HÁBITOS DIARIOS -->
-    <!-- 'daily' viene del controlador main.index -->
     <div class="habit-list">
         {% for habit in daily %}
         <div class="habit-item {% if habit.completed %}completed{% endif %}">
@@ -175,76 +174,72 @@
         {% endfor %}
     </div>
 
-    <!--                 SECCIÓN: HÁBITOS SEMANALES                     -->
+   <!-- SECCIÓN: HÁBITOS SEMANALES -->
+<h2> Semanales</h2>
 
-    <h2>Hábitos Semanales</h2>
+<form class="add-form" action="{{ url_for('main.add_weekly_habit') }}" method="POST"
+      style="flex-direction: column; align-items:center;">
 
-    <!-- Formulario para agregar hábito semanal -->
-    <!-- Aquí se ocupan checkboxes para selección de días -->
-    <form class="add-form" action="{{ url_for('main.add_weekly_habit') }}" method="POST"
-          style="flex-direction: column; align-items:center;">
+    <input type="text" name="name" placeholder="Nuevo hábito semanal..." required>
 
-        <input type="text" name="name" placeholder="Nuevo hábito semanal..." required>
+    <!-- Ya NO hay checkboxes aquí porque sólo deben verse al editar -->
+    <button type="submit" style="margin-top:10px;">Agregar</button>
+</form>
 
+<div class="habit-list">
+    {% for habit in weekly %}
+    <div class="habit-item">
+
+        <span>{{ habit.name }}</span>
+
+        <!-- CHECKBOXES SOLO DE LOS DÍAS CONFIGURADOS -->
         <div class="days-box">
-            <!-- Los values deben coincidir EXACTAMENTE con los que se guardan en DB -->
-            <label class="day-label"><input type="checkbox" name="days" value="mon"> Lun</label>
-            <label class="day-label"><input type="checkbox" name="days" value="tue"> Mar</label>
-            <label class="day-label"><input type="checkbox" name="days" value="wed"> Mié</label>
-            <label class="day-label"><input type="checkbox" name="days" value="thu"> Jue</label>
-            <label class="day-label"><input type="checkbox" name="days" value="fri"> Vie</label>
-            <label class="day-label"><input type="checkbox" name="days" value="sat"> Sáb</label>
-            <label class="day-label"><input type="checkbox" name="days" value="sun"> Dom</label>
+
+            {% set day_names = {
+                'mon': 'Lun', 'tue': 'Mar', 'wed': 'Mié',
+                'thu': 'Jue', 'fri': 'Vie', 'sat': 'Sáb', 'sun': 'Dom'
+            } %}
+
+            {% set days_list = habit.days.split(',') %}
+
+            {% for d in days_list %}
+            <form action="{{ url_for('logs.log_weekly', habit_id=habit.id) }}" 
+                  method="POST"
+                  style="display:inline; margin-right:10px;">
+                
+                <input type="hidden" name="day" value="{{ d }}">
+                
+                <label>
+                    <input type="checkbox" onchange="this.form.submit()">
+                    {{ day_names[d] }}
+                </label>
+            </form>
+            {% endfor %}
         </div>
 
-        <button type="submit" style="margin-top:10px;">Agregar</button>
-    </form>
+        <!-- BOTONES EDITAR/ELIMINAR -->
+        <div class="buttons">
 
-    <!-- LISTA DE HÁBITOS SEMANALES -->
-    <!-- 'weekly' viene del controlador main.index -->
-    <div class="habit-list">
-        {% for habit in weekly %}
-        <div class="habit-item">
-            <span>{{ habit.name }}</span>
+            <a href="{{ url_for('main.edit_weekly', habit_id=habit.id) }}" class="tooltip">
+                <button class="btn btn-edit" type="button">
+                    <i class="fa-solid fa-pen"></i>
+                </button>
+                <span class="tooltiptext">Editar</span>
+            </a>
 
-            <div>
-                <!-- Muestra los días seleccionados -->
-                <small>Días: {{ habit.days }}</small>
-            </div>
+            <form action="{{ url_for('main.delete_weekly', habit_id=habit.id) }}" 
+                  method="POST" class="tooltip">
+                <button class="btn btn-delete" type="submit">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+                <span class="tooltiptext">Eliminar</span>
+            </form>
 
-            <div class="buttons">
-
-                <!-- Ver/registrar días completados -->
-                <!-- OJO: Esta ruta ahora apunta al blueprint logs -->
-                <form action="{{ url_for('logs.log_weekly', habit_id=habit.id) }}" method="POST" class="tooltip">
-                    <button class="btn btn-complete" type="button">
-                        <i class="fa-solid fa-calendar-check"></i>
-                    </button>
-                    <span class="tooltiptext">Registrar día</span>
-                </a>
-
-                <!-- Botón editar -->
-                <a href="{{ url_for('main.edit_weekly', habit_id=habit.id) }}" class="tooltip">
-                    <button class="btn btn-edit" type="button">
-                        <i class="fa-solid fa-pen"></i>
-                    </button>
-                    <span class="tooltiptext">Editar</span>
-                </a>
-
-                <!-- Botón eliminar -->
-                <form action="{{ url_for('main.delete_weekly', habit_id=habit.id) }}" method="POST" class="tooltip">
-                    <button class="btn btn-delete" type="submit">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                    <span class="tooltiptext">Eliminar</span>
-                </form>
-
-            </div>
         </div>
-        {% endfor %}
+
     </div>
+    {% endfor %}
+</div>
 
 </body>
 </html>
-
-
