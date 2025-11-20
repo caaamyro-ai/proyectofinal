@@ -8,7 +8,7 @@
 # A diferencia del modelo WeeklyHabit, aquí se guarda CADA VEZ que el usuario marca un día como completado.
 # Esto es esencial para generar métricas: porcentajes, rachas, totales por mes, etc.
 
-from . import db  # Importa la base de datos inicializada en __init__.py
+from app import db # Importa la base de datos inicializada en __init__.py
 from datetime import date   # Necesario para guardar fechas de completación
 
 

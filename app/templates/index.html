@@ -216,7 +216,7 @@
 
                 <!-- Ver/registrar días completados -->
                 <!-- OJO: Esta ruta ahora apunta al blueprint logs -->
-                <a href="{{ url_for('logs.view_weekly_log', habit_id=habit.id) }}" class="tooltip">
+                <form action="{{ url_for('logs.log_weekly', habit_id=habit.id) }}" method="POST" class="tooltip">
                     <button class="btn btn-complete" type="button">
                         <i class="fa-solid fa-calendar-check"></i>
                     </button>

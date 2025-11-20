@@ -1,0 +1,79 @@
+<!--AQUÍ EDITEN LO QUE QUIERAN, ESTO ES SÓLO UN FORMATO PARA QUE NO SE CAIGA LA APP-->
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Hábito Diario</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #fafafa;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            width: 100%;
+            font-size: 1rem;
+        }
+
+        button {
+            background: #357edd;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        button:hover {
+            background: #285bb5;
+        }
+
+        .cancel {
+            display: block;
+            margin-top: 10px;
+            text-align: center;
+            color: #444;
+            text-decoration: none;
+        }
+
+        .cancel:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Editar Hábito Diario</h2>
+
+    <form method="POST">
+        <label>Nombre del hábito:</label>
+        <input 
+            type="text" 
+            name="name" 
+            value="{{ habit.name }}" 
+            required
+        >
+
+        <button type="submit">Guardar Cambios</button>
+    </form>
+
+    <a href="{{ url_for('main.index') }}" class="cancel">Cancelar</a>
+</body>
+</html>
