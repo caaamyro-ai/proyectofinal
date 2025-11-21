@@ -1,5 +1,5 @@
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy  # Extensión que conecta Flask con la base de datos
+from flask_sqlalchemy import SQLAlchemy
 
 # Crear primero la instancia global de la base de datos
 db = SQLAlchemy()
@@ -9,7 +9,7 @@ def create_app():
 
     # Configuración de la base de datos: usa SQLite y crea habits.db en la carpeta del proyecto
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///habits.db'
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # evita advertencias innecesarias
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     # Vincular la base de datos a la aplicación
     db.init_app(app)

@@ -106,3 +106,9 @@ def delete_weekly(habit_id):
     db.session.delete(habit)
     db.session.commit()
     return redirect(url_for("main.index"))
+
+#Calendario
+
+@main.route("/calendar")
+def calendar():
+    return render_template("calendar.html")

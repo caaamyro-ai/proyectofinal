@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendario - Mis Hábitos</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+    <h1>✨ Mis Hábitos</h1>
+
+    <!-- Navegación -->
+    <div class="tabs">
+        <a href="{{ url_for('main.index') }}" class="tab">
+            <i class="fa-solid fa-list-check"></i> Hábitos
+        </a>
+        <a href="{{ url_for('main.calendar') }}" class="tab active">
+            <i class="fa-solid fa-calendar-days"></i> Calendario
+        </a>
+        <a href="#" class="tab">
+            <i class="fa-solid fa-chart-line"></i> Análisis
+        </a>
+    </div>
+
+    <!-- Contenido del calendario -->
+    <div class="calendar-container">
+        <div class="calendar-header">
+            <h3>Noviembre 2024</h3>
+            <div class="calendar-nav">
+                <button><i class="fa-solid fa-chevron-left"></i> Anterior</button>
+                <button>Siguiente <i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+        </div>
+        
+        <div class="calendar-grid">
+            <!-- Por ahora vacío, lo llenaremos después -->
+            <p style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--muted);">
+                📅 Vista de calendario próximamente
+            </p>
+        </div>
+    </div>
+
+</body>
+</html>
