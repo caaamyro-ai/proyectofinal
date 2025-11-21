@@ -107,11 +107,28 @@ def delete_weekly(habit_id):
     db.session.commit()
     return redirect(url_for("main.index"))
 
-#Calendario
-
+# CALENDARIO
 @main.route("/calendar")
 def calendar():
-    return render_template("calendar.html")
+    from calendar import month_name
+    
+    # Obtener año y mes de los parámetros o usar actual
+    year = request.args.get('year', datetime.now().year, type=int)
+    month = request.args.get('month', datetime.now().month, type=int)
+    
+    # Nombre del mes en español
+    month_names_es = ['', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+    current_month = f"{month_names_es[month]} {year}"
+    
+    # Obtener datos de hábitos completados
+    habit_completions = get_calendar_data(year, month)
+    
+    return render_template("calendar.html",
+                         current_month=current_month,
+                         year=year,
+                         month=month,
+                         habit_completions=habit_completions)
 
 # ============================================
 # FUNCIONES AUXILIARES PARA ANALYTICS
@@ -199,7 +216,7 @@ def calculate_best_streak():
     
     return best_streak
 
-#Análisis
+# ANÁLISIS
 @main.route("/analytics")
 def analytics():
     # Contar hábitos totales
@@ -212,8 +229,112 @@ def analytics():
     completion_rate = calculate_weekly_completion_rate()
     best_streak = calculate_best_streak()
     
+    # Obtener progreso individual
+    habit_progress = get_habit_progress_list()
+    
+    # Obtener actividad semanal - ESTA LÍNEA ES CRÍTICA
+    week_activity = get_week_activity()
+
     return render_template("analytics.html", 
                          total_habits=total_habits,
                          current_streak=current_streak,
                          completion_rate=completion_rate,
-                         best_streak=best_streak)
+                         best_streak=best_streak,
+                         habit_progress=habit_progress,
+                         week_activity=week_activity)
+def get_calendar_data(year, month):
+    """Obtiene los hábitos completados por día para el calendario"""
+    from ..models import WeeklyHabitCompletion
+    from calendar import monthrange
+    
+    # Obtener todos los días del mes con hábitos completados
+    calendar_data = {}
+    
+    # Obtener el rango de días del mes
+    num_days = monthrange(year, month)[1]
+    
+    for day in range(1, num_days + 1):
+        date = datetime(year, month, day).date()
+        
+        # Contar hábitos completados ese día
+        count = WeeklyHabitCompletion.query.filter_by(
+            date=date,
+            completed=True
+        ).count()
+        
+        if count > 0:
+            date_str = date.strftime('%Y-%m-%d')
+            calendar_data[date_str] = count
+    
+    return calendar_data
+def get_habit_progress_list():
+    """Obtiene el progreso de cada hábito en los últimos 7 días"""
+    from ..models import DailyHabit, WeeklyHabitCompletion
+    
+    progress_list = []
+    end_date = datetime.now().date()
+    start_date = end_date - timedelta(days=6)
+    
+    # Obtener todos los hábitos diarios
+    daily_habits = DailyHabit.query.all()
+    
+    for habit in daily_habits:
+        # Contar cuántos días de los últimos 7 completó este hábito
+        completed = WeeklyHabitCompletion.query.filter(
+            WeeklyHabitCompletion.habit_id == habit.id,
+            WeeklyHabitCompletion.habit_type == "daily",
+            WeeklyHabitCompletion.date.between(start_date, end_date),
+            WeeklyHabitCompletion.completed == True
+        ).count()
+        
+        total = 7  # últimos 7 días
+        percentage = int((completed / total) * 100) if total > 0 else 0
+        
+        # Calcular racha para este hábito específico
+        streak = 0
+        check_date = end_date
+        while True:
+            has_completion = WeeklyHabitCompletion.query.filter_by(
+                habit_id=habit.id,
+                habit_type="daily",
+                date=check_date,
+                completed=True
+            ).first()
+            
+            if has_completion:
+                streak += 1
+                check_date -= timedelta(days=1)
+            else:
+                break
+        
+        progress_list.append({
+            'name': habit.name,
+            'completed': completed,
+            'total': total,
+            'percentage': percentage,
+            'streak': streak
+        })
+    
+    return progress_list
+def get_week_activity():
+    """Obtiene la cantidad de hábitos completados por día en la última semana"""
+    from ..models import WeeklyHabitCompletion
+    
+    end_date = datetime.now().date()
+    week_data = []
+    
+    for i in range(6, -1, -1):  # Últimos 7 días
+        date = end_date - timedelta(days=i)
+        count = WeeklyHabitCompletion.query.filter_by(
+            date=date,
+            completed=True
+        ).count()
+        
+        day_name = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'][date.weekday()]
+        
+        week_data.append({
+            'day': day_name,
+            'count': count
+        })
+    
+    return week_data
