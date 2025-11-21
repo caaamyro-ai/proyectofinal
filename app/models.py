@@ -38,29 +38,20 @@ class WeeklyHabit(db.Model):
     # IMPORTANTE: no debe quedar vacío.
 
 #  3) REGISTRO REAL DE CADA DÍA COMPLETADO
-
 class WeeklyHabitCompletion(db.Model):
 
     __tablename__ = "weekly_habit_completion"
 
     id = db.Column(db.Integer, primary_key=True)
 
-    # Relación con WeeklyHabit
-    weekly_habit_id = db.Column(
-        db.Integer,
-        db.ForeignKey("weekly_habits.id"),
-        nullable=False
-    )
+    # ID del hábito (puede ser diario o semanal)
+    habit_id = db.Column(db.Integer, nullable=False)
+    
+    # Tipo de hábito: "daily" o "weekly"
+    habit_type = db.Column(db.String(10), nullable=False)
 
     # Fecha exacta en que el usuario marcó este día como completado
-    date = db.Column(
-        db.Date,
-        default=date.today,
-        nullable=False
-    )
+    date = db.Column(db.Date, default=date.today, nullable=False)
 
     # Booleano para permitir marcar/desmarcar
     completed = db.Column(db.Boolean, default=True)
-
-    # Relación inversa: accedes con habit.completions
-    habit = db.relationship("WeeklyHabit", backref="completions")

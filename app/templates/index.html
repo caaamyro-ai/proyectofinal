@@ -1,137 +1,34 @@
 <!--AQUÍ EDITEN LO QUE QUIERAN, ESTO ES SÓLO UN FORMATO PARA QUE NO SE CAIGA LA APP-->
-<!DOCTYPE html> <!-- Indica al navegador que el documento es HTML5 -->
-<html lang="es"> <!-- Indica que el contenido está en español -->
+<!DOCTYPE html>
+<html lang="es">
 <head>
-    <meta charset="UTF-8"> <!-- Permite tildes y caracteres especiales -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Adaptación para móviles -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Proyecto Latinas in Cloud - Tracker de Hábitos</title>
 
     <!-- Íconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-    <style>
-        /* --- ESTILOS GENERALES --- */
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f6f9;
-            margin: 0;
-            padding: 20px;
-        }
-
-        h1, h2 {
-            text-align: center;
-            color: #333;
-        }
-
-        /* --- FORMULARIOS --- */
-        .add-form {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-        .add-form input {
-            padding: 10px;
-            width: 260px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-        }
-        .add-form button {
-            padding: 10px 15px;
-            margin-left: 10px;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-        .add-form button:hover {
-            background: #0056b3;
-        }
-
-        /* --- LISTA DE HÁBITOS --- */
-        .habit-list {
-            max-width: 600px;
-            margin: auto;
-            margin-top: 30px;
-        }
-        .habit-item {
-            background: white;
-            padding: 12px 15px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-left: 6px solid transparent;
-        }
-        .completed {
-            border-left-color: #28a745;
-            opacity: 0.7;
-            text-decoration: line-through;
-        }
-
-        /* --- BOTONES --- */
-        .buttons form { display: inline; }
-        .btn {
-            padding: 6px 8px;
-            font-size: 16px;
-            border: none;
-            cursor: pointer;
-            border-radius: 6px;
-            margin-left: 5px;
-        }
-        .btn-complete { background: #28a745; color: white; }
-        .btn-edit    { background: #ffc107; }
-        .btn-delete  { background: #dc3545; color: white; }
-        .btn-complete:hover { background: #1e7e34; }
-        .btn-delete:hover   { background: #b52a37; }
-
-        /* --- TOOLTIP --- */
-        .tooltip {
-            position: relative;
-            display: inline-block;
-        }
-        .tooltip .tooltiptext {
-            visibility: hidden;
-            width: 120px;
-            background-color: black;
-            color: #fff;
-            text-align: center;
-            border-radius: 6px;
-            padding: 5px;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%;
-            left: 50%;
-            transform: translateX(-50%);
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        .tooltip:hover .tooltiptext {
-            visibility: visible;
-            opacity: 1;
-        }
-
-        /* --- CHECKBOXES DÍAS SEMANALES --- */
-        .days-box {
-            margin-top: 10px;
-        }
-        .day-label {
-            margin-right: 8px;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 
 <body>
+    <h1> ✨Mis Hábitos</h1>
 
-    <h1>Mis Hábitos</h1>
-
-  
+    <div class="tabs">
+        <a href="{{url_for('main.index')}}" class="tab active"> 
+            <i class="fa-solid fa-list-check"></i> Hábitos
+        </a>
+        <a href="{{ url_for('main.calendar') }}" class="tab">
+            <i class="fa-solid fa-calendar-days"></i> Calendario
+        </a>
+        <a href="{{url_for('main.analytics') }}" class="tab">
+            <i class="fa-solid fa-chart-line"></i> Análisis
+        </a>
+    </div>
     <!-- SECCIÓN: HÁBITOS DIARIOS-->
     <h2> Diarios</h2>
 
     <!-- Formulario para agregar un hábito diario -->
-    <!-- AHORA apunta a la ruta del nuevo blueprint main -->
     <form class="add-form" action="{{ url_for('main.add_daily_habit') }}" method="POST">
         <input type="text" name="name" placeholder="Nuevo hábito diario..." required>
         <button type="submit">Agregar</button>
@@ -175,71 +72,69 @@
     </div>
 
    <!-- SECCIÓN: HÁBITOS SEMANALES -->
-<h2> Semanales</h2>
+    <h2> Semanales</h2>
 
-<form class="add-form" action="{{ url_for('main.add_weekly_habit') }}" method="POST"
-      style="flex-direction: column; align-items:center;">
+    <form class="add-form" action="{{ url_for('main.add_weekly_habit') }}" method="POST"
+          style="flex-direction: column; align-items:center;">
 
-    <input type="text" name="name" placeholder="Nuevo hábito semanal..." required>
+        <input type="text" name="name" placeholder="Nuevo hábito semanal..." required>
+        <button type="submit" style="margin-top:10px;">Agregar</button>
+    </form>
 
-    <!-- Ya NO hay checkboxes aquí porque sólo deben verse al editar -->
-    <button type="submit" style="margin-top:10px;">Agregar</button>
-</form>
+    <div class="habit-list">
+        {% for habit in weekly %}
+        <div class="habit-item">
 
-<div class="habit-list">
-    {% for habit in weekly %}
-    <div class="habit-item">
+            <span>{{ habit.name }}</span>
 
-        <span>{{ habit.name }}</span>
+            <!-- CHECKBOXES SOLO DE LOS DÍAS CONFIGURADOS -->
+            <div class="days-box">
 
-        <!-- CHECKBOXES SOLO DE LOS DÍAS CONFIGURADOS -->
-        <div class="days-box">
+                {% set day_names = {
+                    'mon': 'Lun', 'tue': 'Mar', 'wed': 'Mié',
+                    'thu': 'Jue', 'fri': 'Vie', 'sat': 'Sáb', 'sun': 'Dom'
+                } %}
 
-            {% set day_names = {
-                'mon': 'Lun', 'tue': 'Mar', 'wed': 'Mié',
-                'thu': 'Jue', 'fri': 'Vie', 'sat': 'Sáb', 'sun': 'Dom'
-            } %}
+                {% set days_list = habit.days.split(',') %}
 
-            {% set days_list = habit.days.split(',') %}
+                {% for d in days_list %}
+                <form action="{{ url_for('logs.log_weekly', habit_id=habit.id) }}" 
+                      method="POST"
+                      style="display:inline; margin-right:10px;">
+                    
+                    <input type="hidden" name="day" value="{{ d }}">
+                    
+                    <label>
+                        <input type="checkbox" onchange="this.form.submit()">
+                        {{ day_names[d] }}
+                    </label>
+                </form>
+                {% endfor %}
+            </div>
 
-            {% for d in days_list %}
-            <form action="{{ url_for('logs.log_weekly', habit_id=habit.id) }}" 
-                  method="POST"
-                  style="display:inline; margin-right:10px;">
-                
-                <input type="hidden" name="day" value="{{ d }}">
-                
-                <label>
-                    <input type="checkbox" onchange="this.form.submit()">
-                    {{ day_names[d] }}
-                </label>
-            </form>
-            {% endfor %}
+            <!-- BOTONES EDITAR/ELIMINAR -->
+            <div class="buttons">
+
+                <a href="{{ url_for('main.edit_weekly', habit_id=habit.id) }}" class="tooltip">
+                    <button class="btn btn-edit" type="button">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <span class="tooltiptext">Editar</span>
+                </a>
+
+                <form action="{{ url_for('main.delete_weekly', habit_id=habit.id) }}" 
+                      method="POST" class="tooltip">
+                    <button class="btn btn-delete" type="submit">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                    <span class="tooltiptext">Eliminar</span>
+                </form>
+
+            </div>
+
         </div>
-
-        <!-- BOTONES EDITAR/ELIMINAR -->
-        <div class="buttons">
-
-            <a href="{{ url_for('main.edit_weekly', habit_id=habit.id) }}" class="tooltip">
-                <button class="btn btn-edit" type="button">
-                    <i class="fa-solid fa-pen"></i>
-                </button>
-                <span class="tooltiptext">Editar</span>
-            </a>
-
-            <form action="{{ url_for('main.delete_weekly', habit_id=habit.id) }}" 
-                  method="POST" class="tooltip">
-                <button class="btn btn-delete" type="submit">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
-                <span class="tooltiptext">Eliminar</span>
-            </form>
-
-        </div>
-
+        {% endfor %}
     </div>
-    {% endfor %}
-</div>
 
 </body>
 </html>

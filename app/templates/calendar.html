@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendario - Mis Hábitos</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+    <h1>✨ Mis Hábitos</h1>
+
+    <!-- Navegación -->
+    <div class="tabs">
+        <a href="{{ url_for('main.index') }}" class="tab">
+            <i class="fa-solid fa-list-check"></i> Hábitos
+        </a>
+        <a href="{{ url_for('main.calendar') }}" class="tab active">
+            <i class="fa-solid fa-calendar-days"></i> Calendario
+        </a>
+        <a href="{{ url_for('main.analytics') }}" class="tab">
+            <i class="fa-solid fa-chart-line"></i> Análisis
+        </a>
+    </div>
+
+    <!-- Contenido del calendario -->
+    <div class="calendar-container">
+        <div class="calendar-header">
+            <h3 id="current-month">{{ current_month }}</h3>
+            <div class="calendar-nav">
+                <button onclick="changeMonth(-1)">
+                    <i class="fa-solid fa-chevron-left"></i> Anterior
+                </button>
+                <button onclick="changeMonth(1)">
+                    Siguiente <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="calendar-grid" id="calendar-grid">
+            <!-- Se genera dinámicamente con JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        // Datos desde Flask
+        const habitCompletions = {{ habit_completions|tojson|safe }};
+        let currentYear = {{ year }};
+        let currentMonth = {{ month }};
+        
+        function generateCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '';
+            
+            // Headers de días
+            const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+            dayNames.forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'calendar-day-header';
+                header.textContent = day;
+                grid.appendChild(header);
+            });
+            
+            // Primer día del mes
+            const firstDay = new Date(currentYear, currentMonth - 1, 1).getDay();
+            
+            // Días vacíos al inicio
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day empty';
+                grid.appendChild(emptyDay);
+            }
+            
+            // Días del mes
+            const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
+            const today = new Date();
+            
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day';
+                
+                const currentDate = new Date(currentYear, currentMonth - 1, day);
+                
+                // Marcar día actual
+                if (day === today.getDate() && 
+                    currentMonth - 1 === today.getMonth() && 
+                    currentYear === today.getFullYear()) {
+                    dayDiv.classList.add('today');
+                }
+                
+                // Verificar si hay hábitos completados
+                const dateStr = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const habitsOnDay = habitCompletions[dateStr] || 0;
+                
+                if (habitsOnDay > 0) {
+                    dayDiv.classList.add('has-habits');
+                    
+                    // Crear puntos
+                    const dotsContainer = document.createElement('div');
+                    dotsContainer.className = 'calendar-day-dots';
+                    
+                    const numDots = Math.min(habitsOnDay, 5);
+                    for (let i = 0; i < numDots; i++) {
+                        const dot = document.createElement('div');
+                        dot.className = 'habit-dot';
+                        dotsContainer.appendChild(dot);
+                    }
+                    
+                    dayDiv.innerHTML = `<div class="calendar-day-number">${day}</div>`;
+                    dayDiv.appendChild(dotsContainer);
+                } else {
+                    dayDiv.innerHTML = `<div class="calendar-day-number">${day}</div>`;
+                }
+                
+                grid.appendChild(dayDiv);
+            }
+        }
+        
+        function changeMonth(delta) {
+            currentMonth += delta;
+            
+            if (currentMonth > 12) {
+                currentMonth = 1;
+                currentYear++;
+            } else if (currentMonth < 1) {
+                currentMonth = 12;
+                currentYear--;
+            }
+            
+            window.location.href = `{{ url_for('main.calendar') }}?year=${currentYear}&month=${currentMonth}`;
+        }
+        
+        // Generar al cargar
+        generateCalendar();
+    </script>
+
+</body>
+</html>
+</body>
+</html>

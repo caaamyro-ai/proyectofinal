@@ -1,6 +1,7 @@
 #crear un venv dentro de tu proeycto 
 python -m venv venv
 
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 #activas el venv
 venv\Scripts\activate
 

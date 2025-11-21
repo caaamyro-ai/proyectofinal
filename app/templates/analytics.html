@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis - Mis Hábitos</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+
+<body>
+    <h1>✨ Mis Hábitos</h1>
+
+    <!-- Navegación -->
+    <div class="tabs">
+        <a href="{{ url_for('main.index') }}" class="tab">
+            <i class="fa-solid fa-list-check"></i> Hábitos
+        </a>
+        <a href="{{ url_for('main.calendar') }}" class="tab">
+            <i class="fa-solid fa-calendar-days"></i> Calendario
+        </a>
+        <a href="{{ url_for('main.analytics') }}" class="tab active">
+            <i class="fa-solid fa-chart-line"></i> Análisis
+        </a>
+    </div>
+
+    <!-- Contenido de análisis -->
+    <div class="analytics-container">
+        
+        <!-- Tarjetas de estadísticas -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Racha actual</div>
+                <div class="stat-number">{{ current_streak }}</div>
+                <div class="stat-label">días 🔥</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">Hábitos completados</div>
+                <div class="stat-number">{{ completion_rate }}%</div>
+                <div class="stat-label">esta semana</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">Total hábitos</div>
+                <div class="stat-number">{{ total_habits }}</div>
+                <div class="stat-label">activos</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">Mejor racha</div>
+                <div class="stat-number">{{ best_streak }}</div>
+                <div class="stat-label">días 🏆</div>
+            </div>
+        </div>
+    </div>
+<!-- GRÁFICO NUEVO -->
+<div class="progress-section" style="margin-top: 30px;">
+    <h3><i class="fa-solid fa-chart-area"></i> Actividad de los últimos 7 días</h3>
+    <canvas id="weekChart" style="max-height: 300px;"></canvas>
+</div>
+
+<!-- Progreso por hábito -->
+<div class="progress-section">
+    <h3><i class="fa-solid fa-chart-simple"></i> Progreso por hábito (últimos 7 días)</h3>
+    
+    {% if habit_progress %}
+        {% for habit in habit_progress %}
+        <div class="habit-progress">
+            <div class="habit-progress-header">
+                <span>
+                    {{ habit.name }}
+                    {% if habit.streak > 2 %}
+                    <span class="streak-badge">🔥 {{ habit.streak }} días</span>
+                    {% endif %}
+                </span>
+                <span>{{ habit.completed }}/{{ habit.total }}</span>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" style="width: {{ habit.percentage }}%">
+                    {% if habit.percentage > 15 %}
+                    {{ habit.percentage }}%
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p style="text-align: center; color: var(--muted); padding: 20px;">
+            <i class="fa-solid fa-circle-info"></i> 
+            Completa hábitos durante varios días para ver tu progreso detallado aquí.
+        </p>
+    {% endif %}
+</div> 
+    <script>
+        // Datos desde Flask
+        const weekData = {{ week_activity|tojson }};
+        
+        // Preparar datos para Chart.js
+        const labels = weekData.map(d => d.day);
+        const data = weekData.map(d => d.count);
+        
+        // Crear el gráfico
+        const ctx = document.getElementById('weekChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Hábitos completados',
+                    data: data,
+                    backgroundColor: 'rgba(154, 132, 227, 0.2)',
+                    borderColor: 'rgba(123, 95, 201, 1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
