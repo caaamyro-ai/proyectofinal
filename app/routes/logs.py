@@ -1,7 +1,7 @@
 # estas rutas escriben en WeeklyHabitCompletion para tener estadísticas reales.
 # este archivo se encarga SOLO del registro histórico, para mantener orden.
 
-from flask import Blueprint, redirect, url_for
+from flask import Blueprint, redirect, url_for, request # CAMBIO AQUÍ PORQUE OLVIDAMOS IMPORTAR REQUEST
 from app import db
 from ..models import DailyHabit, WeeklyHabit, WeeklyHabitCompletion
 from datetime import datetime, timezone  # Aconsejable x la zona horaria
