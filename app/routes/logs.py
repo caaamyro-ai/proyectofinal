@@ -54,7 +54,7 @@ def log_weekly(habit_id):
     # *******NUEVO CAMBIO: Registrar la fecha real de cumplimiento********
     # en WeeklyHabitCompletion usando el modelo actual
     completion = WeeklyHabitCompletion(
-        weekly_habit_id=habit.id,
+        habit_id=habit.id, #CAMBIO AQUÍ POR INCONSISTENCIA EN EL MODELO
         date=datetime.now(timezone.utc).date(),
         completed=True
     )
