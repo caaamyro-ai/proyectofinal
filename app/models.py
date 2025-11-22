@@ -7,7 +7,7 @@
 # Este tercer modelo nos permitirá generar estadísticas semanales, mensuales y anuales.
 
 from app import db  # Importa la base de datos inicializada en __init__.py
-from datetime import date   # Necesario para guardar fechas de completación
+from datetime import date, datetime   # Necesario para guardar fechas de completación
 
 #  1) HÁBITOS DIARIOS
 class DailyHabit(db.Model):
@@ -19,6 +19,9 @@ class DailyHabit(db.Model):
 
     completed = db.Column(db.Boolean, default=False)
     # por ahora solo guarda si está o no completado ese día, por default no
+    
+    # NUEVO: Campo para guardar la fecha y hora de completación
+    completed_at = db.Column(db.DateTime, nullable=True)
 
 
 #  2) HÁBITOS SEMANALES
