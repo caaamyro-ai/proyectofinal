@@ -1,18 +1,52 @@
-#ESTE ARCHIVO CONTIENE DATOS FALSOS PARA QUE VEAMOS ESTADÍSTICAS 
+# Archivo que crea una base de datos falsa
 
 from app import db
-from app.models import DailyHabit, WeeklyHabit
+from app.models import DailyHabit, WeeklyHabit, WeeklyHabitCompletion
+from datetime import date, timedelta
+import random
 
-def seed_data():
-    print("Creando hábitos de ejemplo...")
+def run_seed():
+    print(" Generando historial falso para el año completo...")
 
-    h1 = DailyHabit(name="Tomar agua")
-    h2 = DailyHabit(name="Caminar 20 minutos")
+    # 1) Obtener hábitos existentes
+    weekly_habits = WeeklyHabit.query.all()
+    daily_habits  = DailyHabit.query.all()
 
-    h3 = WeeklyHabit(name="Ir al gimnasio", days="mon,wed,fri")
-    h4 = WeeklyHabit(name="Estudiar 2 horas", days="tue,thu")
+    if not weekly_habits and not daily_habits:
+        print(" No existen hábitos en la base de datos.")
+        print("   Crea al menos 1 hábito antes de ejecutar este seed.")
+        return
 
-    db.session.add_all([h1, h2, h3, h4])
+    # 2) Fechas del año
+    start = date(2024, 11, 21)
+    end   = date(2025, 11, 21)
+    current = start
+
+    # 3) Simulación día por día
+    while current <= end:
+
+        # --- SEMANALES ---
+        for habit in weekly_habits:
+            if random.random() < 0.55:  # 55%
+                entry = WeeklyHabitCompletion(
+                    weekly_habit_id=habit.id,  # válido
+                    date=current,
+                    completed=True
+                )
+                db.session.add(entry)
+
+        # --- DIARIOS ---
+        for habit in daily_habits:
+            if random.random() < 0.65:  # 65%
+                entry = WeeklyHabitCompletion(
+                    weekly_habit_id=None,   # ahora es válido
+                    date=current,
+                    completed=True
+                )
+                db.session.add(entry)
+
+        current += timedelta(days=1)
+
     db.session.commit()
 
-    print("Datos insertados correctamente.")
+    print(" Historial generado con éxito.")
