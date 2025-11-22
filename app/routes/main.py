@@ -4,7 +4,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for
 from app import db
 from ..models import DailyHabit, WeeklyHabit
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 main = Blueprint("main", __name__)
 
@@ -36,7 +36,7 @@ def toggle_daily(habit_id):
     habit.completed = not habit.completed
 
     # Si se completa entonces registrar fecha
-    habit.completed_at = datetime.now() if habit.completed else None
+    habit.completed_at = datetime.now(timezone.utc) if habit.completed else None
 
     db.session.commit()
     return redirect(url_for("main.index"))
