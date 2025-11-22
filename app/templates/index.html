@@ -86,31 +86,25 @@
         <div class="habit-item">
 
             <span>{{ habit.name }}</span>
-
             <!-- CHECKBOXES SOLO DE LOS DÍAS CONFIGURADOS -->
-            <div class="days-box">
+<div class="days-box">
 
-                {% set day_names = {
-                    'mon': 'Lun', 'tue': 'Mar', 'wed': 'Mié',
-                    'thu': 'Jue', 'fri': 'Vie', 'sat': 'Sáb', 'sun': 'Dom'
-                } %}
+    {% set days_list = habit.days.split(',') if habit.days else [] %}
 
-                {% set days_list = habit.days.split(',') %}
-
-                {% for d in days_list %}
-                <form action="{{ url_for('logs.log_weekly', habit_id=habit.id) }}" 
-                      method="POST"
-                      style="display:inline; margin-right:10px;">
-                    
-                    <input type="hidden" name="day" value="{{ d }}">
-                    
-                    <label>
-                        <input type="checkbox" onchange="this.form.submit()">
-                        {{ day_names[d] }}
-                    </label>
-                </form>
-                {% endfor %}
-            </div>
+    {% for day in days_list %}
+    <form action="{{ url_for('logs.log_weekly', habit_id=habit.id) }}" 
+          method="POST"
+          style="display:inline;">
+        
+        <input type="hidden" name="day" value="{{ day }}">
+        
+        <label>
+            <input type="checkbox" onchange="this.form.submit()">
+            {{ day[:3] }}  <!-- Muestra solo las primeras 3 letras: "Lun", "Mar", etc. -->
+        </label>
+    </form>
+    {% endfor %}
+</div>
 
             <!-- BOTONES EDITAR/ELIMINAR -->
             <div class="buttons">
