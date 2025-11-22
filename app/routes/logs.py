@@ -43,23 +43,21 @@ def log_daily(habit_id):
 # se contabilizan como "día cumplido" cada vez que el usuario presiona el botón
 @logs.route("/log_weekly/<int:habit_id>", methods=["POST"])
 def log_weekly(habit_id):
-
+    from datetime import datetime, timezone
+    from ..models import WeeklyHabit, WeeklyHabitCompletion
+    
     habit = WeeklyHabit.query.get(habit_id)
 
-    # **********NUEVO CAMBIO: obtiene el día enviado por los checkboxes*******
-    # (si viene desde daily no llegará, está bien)
-    day = request.form.get("day")
+    # Se registra la última fecha en que este hábito semanal fue marcado como cumplido
+    habit.completed_at = datetime.now(timezone.utc)
 
-
-    # *******NUEVO CAMBIO: Registrar la fecha real de cumplimiento********
-    # en WeeklyHabitCompletion usando el modelo actual
-    completion = WeeklyHabitCompletion(
-        habit_id=habit.id, #CAMBIO AQUÍ POR INCONSISTENCIA EN EL MODELO
-        date=datetime.now(timezone.utc).date(),
-        completed=True
+    # Se registra una entrada real en la tabla histórica
+    entry = WeeklyHabitCompletion(
+        habit_id=habit.id,           # ✅ Usar habit_id
+        habit_type="weekly",         # ✅ AGREGAR ESTA LÍNEA
+        date=datetime.now(timezone.utc).date()
     )
+    db.session.add(entry)
 
-    db.session.add(completion)
     db.session.commit()
-
     return redirect(url_for("main.index"))
